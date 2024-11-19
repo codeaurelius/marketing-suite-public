@@ -5,33 +5,34 @@ import arcjet, { detectBot, request } from '@repo/security';
 import type { ReactNode } from 'react';
 import { PostHogIdentifier } from './components/posthog-identifier';
 import { GlobalSidebar } from './components/sidebar';
+import { ClientSidebarProvider } from './components/client-sidebar-provider';
 
 type AppLayoutProperties = {
   readonly children: ReactNode;
 };
 
-const aj = arcjet.withRule(
-  detectBot({
-    mode: 'LIVE',
-    // Allow preview links to show OG images, but no other bots should be
-    // allowed. See https://docs.arcjet.com/bot-protection/identifying-bots
-    allow: ['CATEGORY:PREVIEW'],
-  })
-);
+// const aj = arcjet.withRule(
+//   detectBot({
+//     mode: 'LIVE',
+//     // Allow preview links to show OG images, but no other bots should be
+//     // allowed. See https://docs.arcjet.com/bot-protection/identifying-bots
+//     allow: ['CATEGORY:PREVIEW'],
+//   })
+// );
 
 const AppLayout = async ({ children }: AppLayoutProperties) => {
   const req = await request();
-  const decision = await aj.protect(req);
+  // const decision = await aj.protect(req);
 
   // These errors are handled by the global error boundary, but you could also
   // redirect or show a custom error page
-  if (decision.isDenied()) {
-    if (decision.reason.isBot()) {
-      throw new Error('No bots allowed');
-    }
+  // if (decision.isDenied()) {
+  //   if (decision.reason.isBot()) {
+  //     throw new Error('No bots allowed');
+  //   }
 
-    throw new Error('Access denied');
-  }
+  //   throw new Error('Access denied');
+  // }
 
   const user = await currentUser();
   const { redirectToSignIn } = await auth();
@@ -42,7 +43,7 @@ const AppLayout = async ({ children }: AppLayoutProperties) => {
   }
 
   return (
-    <SidebarProvider>
+    <ClientSidebarProvider>
       <GlobalSidebar>
         {betaFeature && (
           <div className="m-4 rounded-full bg-success p-1.5 text-center text-sm text-success-foreground">
@@ -52,7 +53,7 @@ const AppLayout = async ({ children }: AppLayoutProperties) => {
         {children}
       </GlobalSidebar>
       <PostHogIdentifier />
-    </SidebarProvider>
+    </ClientSidebarProvider>
   );
 };
 
