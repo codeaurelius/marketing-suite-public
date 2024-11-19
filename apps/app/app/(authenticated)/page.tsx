@@ -1,4 +1,4 @@
-import { database } from '@repo/database';
+// import { database } from '@repo/database';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -20,7 +20,49 @@ export const metadata: Metadata = {
 };
 
 const App = async () => {
-  const pages = await database.page.findMany();
+  // const pages = await database.page.findMany();
+  const pages = [
+    {
+      id: 1,
+      name: 'Page 1',
+    },
+    {
+      id: 2,
+      name: 'Page 2',
+    },
+    {
+      id: 3,
+      name: 'Page 3',
+    },
+    {
+      id: 4,
+      name: 'Page 4',
+    },
+    {
+      id: 5,
+      name: 'Page 5',
+    },
+    {
+      id: 6,
+      name: 'Page 6',
+    },
+    {
+      id: 7,
+      name: 'Page 7',
+    },
+    {
+      id: 8,
+      name: 'Page 8',
+    },
+    {
+      id: 9,
+      name: 'Page 9',
+    },
+    {
+      id: 10,
+      name: 'Page 10',  
+    },
+  ];
 
   return (
     <>
