@@ -11,7 +11,6 @@
         "BETTERSTACK_URL",
         "CLERK_SECRET_KEY",
         "CLERK_WEBHOOK_SECRET",
-        "DATABASE_URL",
         "FLAGS_SECRET",
         "STRIPE_SECRET_KEY",
         "RESEND_AUDIENCE_ID",
@@ -21,7 +20,8 @@
         "SENTRY_ORG",
         "SENTRY_PROJECT",
         "STRIPE_WEBHOOK_SECRET",
-        "SVIX_TOKEN"
+        "SVIX_TOKEN",
+        "CONVEX_DEPLOYMENT"
       ]
     },
     "test": {
