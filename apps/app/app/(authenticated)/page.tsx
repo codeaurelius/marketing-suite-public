@@ -1,4 +1,4 @@
-// import { database } from '@repo/database';
+import { api, convex } from '@repo/database';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,6 +10,7 @@ import {
 import { Separator } from '@repo/design-system/components/ui/separator';
 import { SidebarTrigger } from '@repo/design-system/components/ui/sidebar';
 import type { Metadata } from 'next';
+import Tasks from './components/tasks';
 
 const title = 'Acme Inc';
 const description = 'My application.';
@@ -20,49 +21,7 @@ export const metadata: Metadata = {
 };
 
 const App = async () => {
-  // const pages = await database.page.findMany();
-  const pages = [
-    {
-      id: 1,
-      name: 'Page 1',
-    },
-    {
-      id: 2,
-      name: 'Page 2',
-    },
-    {
-      id: 3,
-      name: 'Page 3',
-    },
-    {
-      id: 4,
-      name: 'Page 4',
-    },
-    {
-      id: 5,
-      name: 'Page 5',
-    },
-    {
-      id: 6,
-      name: 'Page 6',
-    },
-    {
-      id: 7,
-      name: 'Page 7',
-    },
-    {
-      id: 8,
-      name: 'Page 8',
-    },
-    {
-      id: 9,
-      name: 'Page 9',
-    },
-    {
-      id: 10,
-      name: 'Page 10',  
-    },
-  ];
+  const _tasks = await convex.query(api.tasks.getTasks);
 
   return (
     <>
@@ -87,11 +46,7 @@ const App = async () => {
       </header>
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
         <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-          {pages.map((page) => (
-            <div key={page.id} className="aspect-video rounded-xl bg-muted/50">
-              {page.name}
-            </div>
-          ))}
+          <Tasks />
         </div>
         <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
       </div>

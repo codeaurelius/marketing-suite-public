@@ -6,7 +6,6 @@ const server: Parameters<typeof createEnv>[0]['server'] = {
   CLERK_WEBHOOK_SECRET: z.string().min(1).startsWith('whsec_'),
   RESEND_AUDIENCE_ID: z.string().min(1),
   RESEND_FROM: z.string().min(1).email(),
-  DATABASE_URL: z.string().min(1).url(),
   RESEND_TOKEN: z.string().min(1).startsWith('re_'),
   STRIPE_SECRET_KEY: z.string().min(1).startsWith('sk_'),
   STRIPE_WEBHOOK_SECRET: z.string().min(1).startsWith('whsec_'),
@@ -28,6 +27,9 @@ const server: Parameters<typeof createEnv>[0]['server'] = {
   VERCEL: z.string().optional(),
   NEXT_RUNTIME: z.enum(['nodejs', 'edge']).optional(),
   FLAGS_SECRET: z.string().min(1),
+
+  // Convex Configuration
+  CONVEX_DEPLOYMENT: z.string().min(1),
 };
 
 const client: Parameters<typeof createEnv>[0]['client'] = {
@@ -42,6 +44,7 @@ const client: Parameters<typeof createEnv>[0]['client'] = {
   NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().min(1).startsWith('G-'),
   NEXT_PUBLIC_POSTHOG_KEY: z.string().min(1).startsWith('phc_'),
   NEXT_PUBLIC_POSTHOG_HOST: z.string().min(1).url(),
+  NEXT_PUBLIC_CONVEX_URL: z.string().min(1).url(),
 
   // Added by Vercel
   NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL: z.string().min(1).url(),
@@ -69,6 +72,7 @@ export const env = createEnv({
     NEXT_RUNTIME: process.env.NEXT_RUNTIME,
     FLAGS_SECRET: process.env.FLAGS_SECRET,
     SVIX_TOKEN: process.env.SVIX_TOKEN,
+    CONVEX_DEPLOYMENT: process.env.CONVEX_DEPLOYMENT,
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
       process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
     NEXT_PUBLIC_CLERK_SIGN_IN_URL: process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL,
@@ -83,7 +87,11 @@ export const env = createEnv({
     NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+    NEXT_PUBLIC_CONVEX_URL: process.env.NEXT_PUBLIC_CONVEX_URL,
     NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL:
       process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL,
   },
+  skipValidation:
+    !!process.env.SKIP_ENV_VALIDATION ||
+    process.env.npm_lifecycle_event === 'lint',
 });
