@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "convex dev --tail-logs",
     "setup": "convex dev --once && convex env set VALIDATE_ENV=true",
-    "build": "convex deploy",
+    "build": "[ \"$SKIP_CONVEX_DEPLOY\" = 'true' ] || convex deploy",
     "import-sample": "convex import --table tasks sampleData.jsonl"
   },
   "dependencies": {
