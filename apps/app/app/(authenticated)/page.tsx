@@ -1,4 +1,4 @@
-import { api, convex } from '@repo/database';
+import { api } from '@repo/database';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,6 +9,7 @@ import {
 } from '@repo/design-system/components/ui/breadcrumb';
 import { Separator } from '@repo/design-system/components/ui/separator';
 import { SidebarTrigger } from '@repo/design-system/components/ui/sidebar';
+import { useQuery } from 'convex/react';
 import type { Metadata } from 'next';
 import Tasks from './components/tasks';
 
@@ -20,8 +21,8 @@ export const metadata: Metadata = {
   description,
 };
 
-const App = async () => {
-  const _tasks = await convex.query(api.tasks.getTasks);
+const App = () => {
+  const _tasks = useQuery(api.tasks.getTasks);
 
   return (
     <>

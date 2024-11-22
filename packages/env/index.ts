@@ -29,7 +29,7 @@ const server: Parameters<typeof createEnv>[0]['server'] = {
   FLAGS_SECRET: z.string().min(1),
 
   // Convex Configuration
-  CONVEX_DEPLOYMENT: z.string().min(1),
+  CONVEX_DEPLOY_KEY: z.string().min(1),
 };
 
 const client: Parameters<typeof createEnv>[0]['client'] = {
@@ -71,7 +71,7 @@ export const env = createEnv({
     NEXT_RUNTIME: process.env.NEXT_RUNTIME,
     FLAGS_SECRET: process.env.FLAGS_SECRET,
     SVIX_TOKEN: process.env.SVIX_TOKEN,
-    CONVEX_DEPLOYMENT: process.env.CONVEX_DEPLOYMENT,
+    CONVEX_DEPLOY_KEY: process.env.CONVEX_DEPLOY_KEY,
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
       process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
     NEXT_PUBLIC_CLERK_SIGN_IN_URL: process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL,
