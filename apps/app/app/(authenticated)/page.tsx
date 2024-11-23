@@ -1,4 +1,3 @@
-import { api } from '@repo/database';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,7 +8,6 @@ import {
 } from '@repo/design-system/components/ui/breadcrumb';
 import { Separator } from '@repo/design-system/components/ui/separator';
 import { SidebarTrigger } from '@repo/design-system/components/ui/sidebar';
-import { useQuery } from 'convex/react';
 import type { Metadata } from 'next';
 import Tasks from './components/tasks';
 
@@ -22,8 +20,6 @@ export const metadata: Metadata = {
 };
 
 const App = () => {
-  const _tasks = useQuery(api.tasks.getTasks);
-
   return (
     <>
       <header className="flex h-16 shrink-0 items-center gap-2">
