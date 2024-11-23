@@ -1,5 +1,6 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { showBetaFeature } from '@repo/feature-flags';
+import type { ReactNode } from 'react';
 import { ClientSidebarProvider } from './components/client-sidebar-provider';
 import { ConvexClientProvider } from './components/convex-client-provider';
 import { PostHogIdentifier } from './components/posthog-identifier';
