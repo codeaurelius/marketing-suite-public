@@ -21,7 +21,7 @@
         "SENTRY_PROJECT",
         "STRIPE_WEBHOOK_SECRET",
         "SVIX_TOKEN",
-        "CONVEX_DEPLOYMENT"
+        "CONVEX_DEPLOY_KEY"
       ]
     },
     "test": {
