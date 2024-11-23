@@ -81,6 +81,10 @@ const data = {
           title: 'Settings',
           url: '#',
         },
+        {
+          title: 'Landing Pages',
+          url: 'landing-pages',
+        },
       ],
     },
     {

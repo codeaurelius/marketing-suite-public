@@ -4,7 +4,7 @@ import { env } from '@repo/env';
 import { VercelToolbar } from '@vercel/toolbar/next';
 import type { ThemeProviderProps } from 'next-themes';
 import { ThemeProvider } from 'next-themes';
-import { Toaster } from './components/ui/sonner';
+import { Toaster } from './components/ui/toaster';
 import { TooltipProvider } from './components/ui/tooltip';
 
 type DesignSystemProviderProperties = ThemeProviderProps;

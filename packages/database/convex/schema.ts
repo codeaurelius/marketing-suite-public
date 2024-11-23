@@ -1,5 +1,5 @@
-import { defineSchema, defineTable } from "convex/server";
-import { v } from "convex/values";
+import { defineSchema, defineTable } from 'convex/server';
+import { v } from 'convex/values';
 
 export default defineSchema({
   // Define your tables here
@@ -12,5 +12,18 @@ export default defineSchema({
   tasks: defineTable({
     text: v.string(),
     isCompleted: v.boolean(),
+  }),
+  landingPages: defineTable({
+    title: v.string(),
+    description: v.string(),
+    productName: v.string(),
+    targetAudience: v.string(),
+    keyFeatures: v.string(),
+    callToAction: v.string(),
+    template: v.union(v.literal('modern'), v.literal('classic')),
+    html: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    userId: v.string(),
   }),
 });
