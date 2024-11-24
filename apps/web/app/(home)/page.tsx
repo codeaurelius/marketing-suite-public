@@ -30,7 +30,7 @@ const Home = () => {
         <h1 className="mb-6 text-6xl font-bold tracking-tight text-gray-900">
           Amaze Suite
         </h1>
-        <p className="mx-auto max-w-2xl text-xl text-gray-600">
+        <p className="mx-auto max-w-2xl text-gray-600 text-xl">
           Your marketing operations, simplified.
         </p>
       </div>
