@@ -8,5 +8,12 @@
       "apps/docs/**/*.json",
       "packages/env/index.ts"
     ]
+  },
+  "linter": {
+    "rules": {
+      "nursery": {
+        "useSortedClasses": "off"
+      }
+    }
   }
 }
