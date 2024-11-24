@@ -99,11 +99,19 @@ export const update = mutation({
     // Check if user has permission to update this tenant
     const tenantUser = await ctx.db
       .query('tenantUsers')
-      .filter((q) => q.eq(q.field('userId'), identity.subject))
+      .filter((q) =>
+        q.and(
+          q.eq(q.field('userId'), identity.subject),
+          q.eq(q.field('tenantId'), args.id),
+          q.or(q.eq(q.field('role'), 'owner'), q.eq(q.field('role'), 'admin'))
+        )
+      )
       .first();
 
     if (!tenantUser) {
-      throw new Error('Not authorized');
+      throw new Error(
+        'Not authorized - only owners and admins can update tenants'
+      );
     }
 
     const existing = await ctx.db.get(args.id);
@@ -122,6 +130,27 @@ export const update = mutation({
 export const remove = mutation({
   args: { id: v.id('tenants') },
   handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error('Not authenticated');
+    }
+
+    // Check if user has permission to delete this tenant
+    const tenantUser = await ctx.db
+      .query('tenantUsers')
+      .filter((q) =>
+        q.and(
+          q.eq(q.field('userId'), identity.subject),
+          q.eq(q.field('tenantId'), args.id),
+          q.eq(q.field('role'), 'owner') // Only owners can delete tenants
+        )
+      )
+      .first();
+
+    if (!tenantUser) {
+      throw new Error('Not authorized - only owners can delete tenants');
+    }
+
     const tenant = await ctx.db.get(args.id);
     if (!tenant) {
       throw new Error('Tenant not found');
@@ -145,6 +174,16 @@ export const remove = mutation({
 
     for (const landingPage of landingPages) {
       await ctx.db.delete(landingPage._id);
+    }
+
+    // Delete all tenant users
+    const tenantUsers = await ctx.db
+      .query('tenantUsers')
+      .filter((q) => q.eq(q.field('tenantId'), args.id))
+      .collect();
+
+    for (const user of tenantUsers) {
+      await ctx.db.delete(user._id);
     }
 
     // Finally delete the tenant
