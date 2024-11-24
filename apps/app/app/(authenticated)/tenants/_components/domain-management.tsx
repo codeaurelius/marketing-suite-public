@@ -41,6 +41,16 @@ interface DomainManagementProps {
   tenantId: Id<'tenants'>;
 }
 
+const EmptyState = () => (
+  <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
+    <Globe className="h-12 w-12 text-muted-foreground/50" />
+    <h3 className="mt-4 text-lg font-semibold">No domains configured</h3>
+    <p className="mt-2 text-sm text-muted-foreground">
+      Add a domain to start managing your landing pages with custom domains.
+    </p>
+  </div>
+);
+
 export function DomainManagement({ tenantId }: DomainManagementProps) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newDomain, setNewDomain] = useState('');
@@ -149,74 +159,81 @@ export function DomainManagement({ tenantId }: DomainManagementProps) {
           </div>
 
           <div className="space-y-4">
-            {domains?.map((domain) => (
-              <div
-                key={domain._id}
-                className="flex items-center justify-between rounded-lg border p-4"
-              >
-                <div>
-                  <p className="font-medium">{domain.domain}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Status: {domain.status}
-                  </p>
+            {domains?.length === 0 ? (
+              <EmptyState />
+            ) : (
+              domains?.map((domain) => (
+                <div
+                  key={domain._id}
+                  className="flex items-center justify-between rounded-lg border p-4"
+                >
+                  <div>
+                    <p className="font-medium">{domain.domain}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Status: {domain.status}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleVerifyDomain(domain._id)}
+                      disabled={domain.status === 'verified'}
+                    >
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Verify
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive" size="sm">
+                          <TrashIcon className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Domain</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete this domain? This
+                            action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={async () => {
+                              try {
+                                await deleteDomain({ domainId: domain._id });
+                                toast({
+                                  title: 'Success',
+                                  description: 'Domain deleted successfully',
+                                });
+                              } catch (error) {
+                                // biome-ignore lint/suspicious/noConsole: <explanation>
+                                console.error(
+                                  'Failed to delete domain:',
+                                  error
+                                );
+                                const errorMessage =
+                                  error instanceof Error
+                                    ? error.message
+                                    : 'Failed to delete domain';
+                                toast({
+                                  title: 'Error',
+                                  description: errorMessage,
+                                  variant: 'destructive',
+                                });
+                              }
+                            }}
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleVerifyDomain(domain._id)}
-                    disabled={domain.status === 'verified'}
-                  >
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    Verify
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="destructive" size="sm">
-                        <TrashIcon className="h-4 w-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Domain</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete this domain? This
-                          action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={async () => {
-                            try {
-                              await deleteDomain({ domainId: domain._id });
-                              toast({
-                                title: 'Success',
-                                description: 'Domain deleted successfully',
-                              });
-                            } catch (error) {
-                              // biome-ignore lint/suspicious/noConsole: <explanation>
-                              console.error('Failed to delete domain:', error);
-                              const errorMessage =
-                                error instanceof Error
-                                  ? error.message
-                                  : 'Failed to delete domain';
-                              toast({
-                                title: 'Error',
-                                description: errorMessage,
-                                variant: 'destructive',
-                              });
-                            }
-                          }}
-                        >
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </CardContent>

@@ -5,7 +5,8 @@ When generating new features, use this global guidelines:
 - wnen updating the database scheme, need to create migration scripts for the affected tables
 - when using useQuery to get data from the database, ensure that that is done inside a client component
 - all form submit buttons should be disabled unless all form fields are valid
-- mport type { Id } from '@repo/database/convex/_generated/dataModel' instead of importing it from convex/dataModel
+- import type { Id } from '@repo/database/convex/_generated/dataModel' instead of importing it from convex/dataModel
+- when creating client components that list some data, always implement an empty state to inform the user that there is no data or what to expect on that page
 
 Forms:
 - always validate the input and use the `useToast` hook to show errors
