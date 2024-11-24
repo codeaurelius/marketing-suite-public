@@ -37,9 +37,17 @@ import { useMutation, useQuery } from 'convex/react';
 import { Globe, PlusIcon, RefreshCw, TrashIcon } from 'lucide-react';
 import { useState } from 'react';
 
+// Define regex pattern at the top level for better performance
+const DOMAIN_REGEX =
+  /^(?!:\/\/)(?![-])[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/;
+
 interface DomainManagementProps {
   tenantId: Id<'tenants'>;
 }
+
+const isValidDomain = (domain: string): boolean => {
+  return DOMAIN_REGEX.test(domain);
+};
 
 const EmptyState = () => (
   <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
@@ -54,6 +62,7 @@ const EmptyState = () => (
 export function DomainManagement({ tenantId }: DomainManagementProps) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newDomain, setNewDomain] = useState('');
+  const [domainError, setDomainError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const domains = useQuery(api.domains.list, { tenantId });
@@ -62,6 +71,11 @@ export function DomainManagement({ tenantId }: DomainManagementProps) {
   const deleteDomain = useMutation(api.domains.remove);
 
   const handleAddDomain = async () => {
+    if (!isValidDomain(newDomain)) {
+      setDomainError('Please enter a valid domain (e.g., example.com)');
+      return;
+    }
+
     try {
       await createDomain({
         domain: newDomain,
@@ -141,14 +155,27 @@ export function DomainManagement({ tenantId }: DomainManagementProps) {
                       id="domain"
                       placeholder="example.com"
                       value={newDomain}
-                      onChange={(e) => setNewDomain(e.target.value)}
+                      onChange={(e) => {
+                        setNewDomain(e.target.value);
+                        setDomainError(null);
+                      }}
+                      className={domainError ? 'border-destructive' : ''}
+                      aria-invalid={!!domainError}
+                      aria-errormessage={
+                        domainError ? 'domain-error' : undefined
+                      }
                     />
+                    {domainError && (
+                      <p id="domain-error" className="text-sm text-destructive">
+                        {domainError}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <DialogFooter>
                   <Button
                     onClick={handleAddDomain}
-                    disabled={!newDomain}
+                    disabled={!newDomain || !!domainError}
                     type="submit"
                   >
                     Add Domain
