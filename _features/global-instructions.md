@@ -5,3 +5,9 @@ When generating new features, use this global guidelines:
 - wnen updating the database scheme, need to create migration scripts for the affected tables
 - when using useQuery to get data from the database, ensure that that is done inside a client component
 - all form submit buttons should be disabled unless all form fields are valid
+
+Forms:
+- always validate the input and use the `useToast` hook to show errors
+- add a visual feedback to the form fields (e.g. red border when invalid)
+- disable form controls when the form is submitting
+- add proper aria attributes to the form controls

@@ -87,7 +87,7 @@ export const create = mutation({
 export const update = mutation({
   args: {
     id: v.id('tenants'),
-    name: v.string(),
+    name: v.optional(v.string()),
     status: v.union(v.literal('active'), v.literal('inactive')),
   },
   handler: async (ctx, args) => {
@@ -99,22 +99,55 @@ export const update = mutation({
     // Check if user has permission to update this tenant
     const tenantUser = await ctx.db
       .query('tenantUsers')
-      .filter((q) =>
-        q.and(
-          q.eq(q.field('tenantId'), args.id),
-          q.eq(q.field('userId'), identity.subject)
-        )
-      )
+      .filter((q) => q.eq(q.field('userId'), identity.subject))
       .first();
 
-    if (!tenantUser || tenantUser.role === 'user') {
+    if (!tenantUser) {
       throw new Error('Not authorized');
     }
 
+    const existing = await ctx.db.get(args.id);
+    if (!existing) {
+      throw new Error('Tenant not found');
+    }
+
     return await ctx.db.patch(args.id, {
-      name: args.name,
+      ...(args.name && { name: args.name }),
       status: args.status,
       updatedAt: Date.now(),
     });
+  },
+});
+
+export const remove = mutation({
+  args: { id: v.id('tenants') },
+  handler: async (ctx, args) => {
+    const tenant = await ctx.db.get(args.id);
+    if (!tenant) {
+      throw new Error('Tenant not found');
+    }
+
+    // Delete all domains associated with this tenant
+    const domains = await ctx.db
+      .query('domains')
+      .filter((q) => q.eq(q.field('tenantId'), args.id))
+      .collect();
+
+    for (const domain of domains) {
+      await ctx.db.delete(domain._id);
+    }
+
+    // Delete all landing pages associated with this tenant
+    const landingPages = await ctx.db
+      .query('landingPages')
+      .filter((q) => q.eq(q.field('tenantId'), args.id))
+      .collect();
+
+    for (const landingPage of landingPages) {
+      await ctx.db.delete(landingPage._id);
+    }
+
+    // Finally delete the tenant
+    await ctx.db.delete(args.id);
   },
 });

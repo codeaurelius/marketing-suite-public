@@ -6,7 +6,7 @@ import {
 } from '@repo/design-system/components/ui/breadcrumb';
 import { SidebarTrigger } from '@repo/design-system/components/ui/sidebar';
 import type { Metadata } from 'next';
-import { TenantsContent } from './_components/tenants-content';
+import { TenantsList } from './_components/tenants-list';
 
 const title = 'Tenants';
 const description = 'Manage your tenants and their settings';
@@ -31,7 +31,7 @@ export default function TenantsPage() {
           </Breadcrumb>
         </div>
       </header>
-      <TenantsContent />
+      <TenantsList />
     </>
   );
 }
