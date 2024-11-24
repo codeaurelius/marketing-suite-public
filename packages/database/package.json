@@ -11,13 +11,13 @@
   },
   "dependencies": {
     "@repo/env": "workspace:*",
-    "convex": "^1.17.0",
+    "convex": "^1.17.2",
     "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
-    "@types/node": "22.9.0",
+    "@types/node": "22.9.3",
     "bufferutil": "^4.0.8",
-    "typescript": "^5.6.3"
+    "typescript": "^5.7.2"
   }
 }
