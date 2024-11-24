@@ -1,3 +1,5 @@
+// Keeping the original imports as documentation
+/*
 import { showBetaFeature } from '@repo/feature-flags';
 import { createMetadata } from '@repo/seo/metadata';
 import type { Metadata } from 'next';
@@ -8,15 +10,37 @@ import { Features } from './components/features';
 import { Hero } from './components/hero';
 import { Stats } from './components/stats';
 import { Testimonials } from './components/testimonials';
+*/
+
+import { createMetadata } from '@repo/seo/metadata';
+import type { Metadata } from 'next';
 
 const meta = {
-  title: 'From zero to production in minutes.',
+  title: 'Amaze Suite - Simplify Your Marketing',
   description:
-    "next-forge is a production-grade boilerplate for modern Next.js apps. It's designed to have everything you need to build your new SaaS app as quick as possible. Authentication, billing, analytics, SEO, and more. It's all here.",
+    'Amaze Suite helps you streamline your marketing operations and achieve better results.',
 };
 
 export const metadata: Metadata = createMetadata(meta);
 
+const Home = () => {
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-white to-gray-50">
+      <div className="container mx-auto px-4 text-center">
+        <h1 className="mb-6 text-6xl font-bold tracking-tight text-gray-900">
+          Amaze Suite
+        </h1>
+        <p className="mx-auto max-w-2xl text-xl text-gray-600">
+          Your marketing operations, simplified.
+        </p>
+      </div>
+    </main>
+  );
+};
+
+export default Home;
+
+/* Original component for documentation
 const Home = async () => {
   const betaFeature = await showBetaFeature();
 
@@ -37,5 +61,4 @@ const Home = async () => {
     </>
   );
 };
-
-export default Home;
+*/

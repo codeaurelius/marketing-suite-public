@@ -1,11 +1,10 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
-import { SidebarProvider } from '@repo/design-system/components/ui/sidebar';
 import { showBetaFeature } from '@repo/feature-flags';
-import arcjet, { detectBot, request } from '@repo/security';
 import type { ReactNode } from 'react';
+import { ClientSidebarProvider } from './components/client-sidebar-provider';
+import { ConvexClientProvider } from './components/convex-client-provider';
 import { PostHogIdentifier } from './components/posthog-identifier';
 import { GlobalSidebar } from './components/sidebar';
-import { ClientSidebarProvider } from './components/client-sidebar-provider';
 
 type AppLayoutProperties = {
   readonly children: ReactNode;
@@ -21,7 +20,7 @@ type AppLayoutProperties = {
 // );
 
 const AppLayout = async ({ children }: AppLayoutProperties) => {
-  const req = await request();
+  // const req = await request();
   // const decision = await aj.protect(req);
 
   // These errors are handled by the global error boundary, but you could also
@@ -43,17 +42,19 @@ const AppLayout = async ({ children }: AppLayoutProperties) => {
   }
 
   return (
-    <ClientSidebarProvider>
-      <GlobalSidebar>
-        {betaFeature && (
-          <div className="m-4 rounded-full bg-success p-1.5 text-center text-sm text-success-foreground">
-            Beta feature now available
-          </div>
-        )}
-        {children}
-      </GlobalSidebar>
-      <PostHogIdentifier />
-    </ClientSidebarProvider>
+    <ConvexClientProvider>
+      <ClientSidebarProvider>
+        <GlobalSidebar>
+          {betaFeature && (
+            <div className="m-4 rounded-full bg-success p-1.5 text-center text-sm text-success-foreground">
+              Beta feature now available
+            </div>
+          )}
+          {children}
+        </GlobalSidebar>
+        <PostHogIdentifier />
+      </ClientSidebarProvider>
+    </ConvexClientProvider>
   );
 };
 
