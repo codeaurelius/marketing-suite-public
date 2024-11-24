@@ -23,7 +23,7 @@ export default defineSchema(
       tenantId: v.id('tenants'),
       role: v.union(v.literal('owner'), v.literal('admin'), v.literal('user')),
       createdAt: v.number(),
-    }),
+    }).index('by_user_tenant', ['userId', 'tenantId']),
     landingPages: defineTable({
       title: v.string(),
       description: v.string(),
@@ -54,8 +54,8 @@ export default defineSchema(
     }),
     // New table for mapping domains to landing pages
     landingPageDomains: defineTable({
-      landingPageId: v.id('landingPages'),
       domainId: v.id('domains'),
+      landingPageId: v.id('landingPages'),
       isDefault: v.boolean(),
       path: v.optional(v.string()), // Optional path for subdirectory routing
       createdAt: v.number(),

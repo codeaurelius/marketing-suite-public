@@ -54,6 +54,32 @@ export const getById = query({
   },
 });
 
+export const get = query({
+  args: {
+    id: v.id('tenants'),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error('Not authenticated');
+    }
+
+    // Check if user has permission for this tenant
+    const tenantUser = await ctx.db
+      .query('tenantUsers')
+      .withIndex('by_user_tenant', (q) =>
+        q.eq('userId', identity.subject).eq('tenantId', args.id)
+      )
+      .first();
+
+    if (!tenantUser) {
+      throw new Error('Not authorized');
+    }
+
+    return await ctx.db.get(args.id);
+  },
+});
+
 export const create = mutation({
   args: {
     name: v.string(),

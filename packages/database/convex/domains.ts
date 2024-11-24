@@ -15,6 +15,7 @@ export const list = query({
     const domainsWithPages = await Promise.all(
       domains.map(async (domain) => {
         const mappings = await ctx.db
+          // biome-ignore lint/nursery/noSecrets: <explanation>
           .query('landingPageDomains')
           .withIndex('by_domain', (q) => q.eq('domainId', domain._id))
           .collect();
@@ -118,6 +119,7 @@ export const attachToLandingPage = mutation({
     // If this is set as default, unset any existing default for this landing page
     if (args.isDefault) {
       const existingMappings = await ctx.db
+        // biome-ignore lint/nursery/noSecrets: <explanation>
         .query('landingPageDomains')
         .withIndex('by_landing_page', (q) =>
           q.eq('landingPageId', args.landingPageId)
@@ -136,6 +138,7 @@ export const attachToLandingPage = mutation({
       });
     }
 
+    // biome-ignore lint/nursery/noSecrets: <explanation>
     return await ctx.db.insert('landingPageDomains', {
       domainId: args.domainId,
       landingPageId: args.landingPageId,
@@ -169,5 +172,49 @@ export const verifyDomain = mutation({
       status: 'verified',
       updatedAt: Date.now(),
     });
+  },
+});
+
+export const remove = mutation({
+  args: {
+    domainId: v.id('domains'),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error('Not authenticated');
+    }
+
+    // Get the domain
+    const domain = await ctx.db.get(args.domainId);
+    if (!domain) {
+      throw new Error('Domain not found');
+    }
+
+    // Check if user has permission for this tenant
+    const tenantUser = await ctx.db
+      .query('tenantUsers')
+      .withIndex('by_user_tenant', (q) =>
+        q.eq('userId', identity.subject).eq('tenantId', domain.tenantId)
+      )
+      .first();
+
+    if (!tenantUser) {
+      throw new Error('Not authorized');
+    }
+
+    // Delete any landing page mappings
+    const mappings = await ctx.db
+      // biome-ignore lint/nursery/noSecrets: <explanation>
+      .query('landingPageDomains')
+      .withIndex('by_domain', (q) => q.eq('domainId', args.domainId))
+      .collect();
+
+    for (const mapping of mappings) {
+      await ctx.db.delete(mapping._id);
+    }
+
+    // Delete the domain
+    await ctx.db.delete(args.domainId);
   },
 });

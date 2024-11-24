@@ -1,6 +1,7 @@
 'use client';
 
 import { api } from '@repo/database';
+import type { Id } from '@repo/database/convex/_generated/dataModel';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,8 +24,8 @@ import {
 } from '@repo/design-system/components/ui/table';
 import { useToast } from '@repo/design-system/components/ui/use-toast';
 import { useMutation, useQuery } from 'convex/react';
-import type { Id } from 'convex/values';
 import { PlusIcon, PowerIcon, TrashIcon } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
 import { AddTenantDialog } from './add-tenant-dialog';
 
@@ -43,6 +44,7 @@ export function TenantsList() {
         description: 'Tenant deleted successfully',
       });
     } catch (error) {
+      // biome-ignore lint/suspicious/noConsole: <explanation>
       console.error('Failed to delete tenant:', error);
       const errorMessage =
         error instanceof Error ? error.message : 'Failed to delete tenant';
@@ -70,6 +72,7 @@ export function TenantsList() {
         } successfully`,
       });
     } catch (error) {
+      // biome-ignore lint/suspicious/noConsole: <explanation>
       console.error('Failed to update tenant status:', error);
       const errorMessage =
         error instanceof Error
@@ -110,7 +113,14 @@ export function TenantsList() {
           <TableBody>
             {tenants?.map((tenant) => (
               <TableRow key={tenant._id}>
-                <TableCell className="font-medium">{tenant.name}</TableCell>
+                <TableCell>
+                  <Link
+                    href={`/tenants/${tenant._id}`}
+                    className="font-medium hover:underline"
+                  >
+                    {tenant.name}
+                  </Link>
+                </TableCell>
                 <TableCell>{tenant.domainsCount ?? 0}</TableCell>
                 <TableCell>
                   <span

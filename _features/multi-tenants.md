@@ -18,4 +18,6 @@ Here’s a high-level architecture of the components needed to implement your cl
 	•	You’ll need to validate that the client’s domain is correctly pointing to your server (this could be done via DNS record checks or by hosting a special file on their domain).
 
 
+At any time, keep in mind the global instructions found in the _features/global-instructions.md file.
+
 
