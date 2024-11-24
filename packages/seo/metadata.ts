@@ -7,13 +7,13 @@ type MetadataGenerator = Omit<Metadata, 'description' | 'title'> & {
   image?: string;
 };
 
-const applicationName = 'next-forge';
+const applicationName = 'Amaze Suite';
 const author: Metadata['authors'] = {
-  name: 'Hayden Bleasel',
-  url: 'https://haydenbleasel.com/',
+  name: 'Amaze Suite',
+  url: 'https://amazesuite.com/',
 };
-const publisher = 'Hayden Bleasel';
-const twitterHandle = '@haydenbleasel';
+const publisher = 'Amaze Suite';
+const twitterHandle = '@amazesuite';
 
 export const createMetadata = ({
   title,
