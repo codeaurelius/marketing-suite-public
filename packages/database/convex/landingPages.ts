@@ -15,6 +15,11 @@ export const create = mutation({
     tenantId: v.id('tenants'),
   },
   handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error('Not authenticated');
+    }
+
     const now = Date.now();
     return await ctx.db.insert('landingPages', {
       ...args,

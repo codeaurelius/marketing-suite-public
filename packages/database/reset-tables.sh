@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define an array of tables and their corresponding data files
-tables=("landingPageDomains" "landingPages" "domains" "tasks" "tenantUsers" "tenants" "users")
+tables=("landingPageDomains" "landingPages" "domains" "tenantUsers" "tenants" "users")
 
 data_file="empty.jsonl"
 

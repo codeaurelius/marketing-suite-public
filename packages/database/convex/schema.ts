@@ -11,10 +11,6 @@ export default defineSchema(
       age: v.optional(v.number()),
       createdAt: v.number(),
     }),
-    tasks: defineTable({
-      text: v.string(),
-      isCompleted: v.boolean(),
-    }),
     tenants: defineTable({
       name: v.string(),
       status: v.union(v.literal('active'), v.literal('inactive')),
