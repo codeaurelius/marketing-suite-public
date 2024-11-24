@@ -18,7 +18,7 @@ import type { Metadata } from 'next';
 const meta = {
   title: 'Amaze Suite - Simplify Your Marketing',
   description:
-    'Amaze Suite helps you streamline your marketing operations and achieve better results.',
+    '[1] Amaze Suite helps you streamline your marketing operations and achieve better results.',
 };
 
 export const metadata: Metadata = createMetadata(meta);
