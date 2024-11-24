@@ -37,6 +37,7 @@ import {
   AnchorIcon,
   BookOpenIcon,
   BotIcon,
+  BuildingIcon,
   ChevronRightIcon,
   FolderIcon,
   FrameIcon,
@@ -51,6 +52,7 @@ import {
   Trash2Icon,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
+import React from 'react';
 
 type GlobalSidebarProperties = {
   readonly children: ReactNode;
@@ -60,7 +62,8 @@ const data = {
   user: {
     name: 'shadcn',
     email: 'm@example.com',
-    avatar: '/avatars/shadcn.jpg',
+    image:
+      'https://pbs.twimg.com/profile_images/1574758464620605440/OB8Q4RqE_400x400.jpg',
   },
   navMain: [
     {
@@ -187,6 +190,33 @@ const data = {
       icon: MapIcon,
     },
   ],
+  menu: [
+    {
+      title: 'Menu',
+      items: [
+        {
+          label: 'Dashboard',
+          icon: PieChartIcon,
+          href: '/',
+        },
+        {
+          label: 'Tenants',
+          icon: BuildingIcon,
+          href: '/tenants',
+        },
+        {
+          label: 'Landing Pages',
+          icon: FrameIcon,
+          href: '/landing-pages',
+        },
+        {
+          label: 'Domains',
+          icon: AnchorIcon,
+          href: '/domains',
+        },
+      ],
+    },
+  ],
 };
 
 export const GlobalSidebar = ({ children }: GlobalSidebarProperties) => {
@@ -246,6 +276,48 @@ export const GlobalSidebar = ({ children }: GlobalSidebarProperties) => {
                                 <SidebarMenuSubButton asChild>
                                   <a href={subItem.url}>
                                     <span>{subItem.title}</span>
+                                  </a>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            ))}
+                          </SidebarMenuSub>
+                        </CollapsibleContent>
+                      </>
+                    ) : null}
+                  </SidebarMenuItem>
+                </Collapsible>
+              ))}
+            </SidebarMenu>
+          </SidebarGroup>
+          <SidebarGroup>
+            <SidebarGroupLabel>Admin</SidebarGroupLabel>
+            <SidebarMenu>
+              {data.menu.map((item) => (
+                <Collapsible key={item.title} asChild defaultOpen={true}>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild tooltip={item.title}>
+                      <CollapsibleTrigger asChild>
+                        <a href={item.items[0].href}>
+                          {React.createElement(item.items[0].icon, {})}
+                          <span>{item.title}</span>
+                        </a>
+                      </CollapsibleTrigger>
+                    </SidebarMenuButton>
+                    {item.items?.length ? (
+                      <>
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuAction className="data-[state=open]:rotate-90">
+                            <ChevronRightIcon />
+                            <span className="sr-only">Toggle</span>
+                          </SidebarMenuAction>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <SidebarMenuSub>
+                            {item.items?.map((subItem) => (
+                              <SidebarMenuSubItem key={subItem.label}>
+                                <SidebarMenuSubButton asChild>
+                                  <a href={subItem.href}>
+                                    <span>{subItem.label}</span>
                                   </a>
                                 </SidebarMenuSubButton>
                               </SidebarMenuSubItem>

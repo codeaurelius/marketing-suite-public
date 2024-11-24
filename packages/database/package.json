@@ -6,8 +6,10 @@
   "scripts": {
     "dev": "convex dev --tail-logs",
     "setup": "convex dev --once && convex env set VALIDATE_ENV=true",
-    "build": "[ \"$VERCEL_ENV\" = \"preview\" ] && echo \"Skipping convex deploy in preview environment\" || convex deploy",
-    "import-sample": "convex import --table tasks sampleData.jsonl"
+    "build": "[ \"$VERCEL_ENV\" = \"preview\" ] && echo \"Skipping convex deploy in preview environment\" || pnpm run deploy",
+    "deploy": "./reset-tables.sh && convex deploy --dry-run && convex run --prod init:init",
+    "import-sample": "convex import --table tasks sampleData.jsonl",
+    "reset-tables": "./reset-tables.sh"
   },
   "dependencies": {
     "@repo/env": "workspace:*",
