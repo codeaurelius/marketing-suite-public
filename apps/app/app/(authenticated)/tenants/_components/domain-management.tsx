@@ -66,6 +66,7 @@ export const DomainManagement = ({ tenantId }: DomainManagementProps) => {
   const [isAddingDomain, setIsAddingDomain] = useState(false);
   const [isVerifyingDomain, setIsVerifyingDomain] = useState(false);
   const [domainConfigs, setDomainConfigs] = useState<Record<string, any>>({});
+  const [isLoadingConfig, setIsLoadingConfig] = useState<Record<string, boolean>>({});
   const domains = useQuery(api.domains.list, { tenantId });
   const addDomain = useMutation(api.domains.create);
   const verifyDomain = useMutation(api.domains.verifyDomain);
@@ -226,6 +227,41 @@ export const DomainManagement = ({ tenantId }: DomainManagementProps) => {
     }
   };
 
+  const handleGetConfig = async (domain: string) => {
+    setIsLoadingConfig((prev) => ({ ...prev, [domain]: true }));
+    try {
+      const response = await fetch(
+        `${env.NEXT_PUBLIC_API_URL}/domains/${domain}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to get domain configuration');
+      }
+
+      const config = await response.json();
+      setDomainConfigs((prev) => ({ ...prev, [domain]: config }));
+
+      toast({
+        title: 'Configuration retrieved',
+        description: 'Domain configuration has been updated',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to get domain configuration. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoadingConfig((prev) => ({ ...prev, [domain]: false }));
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -298,8 +334,25 @@ export const DomainManagement = ({ tenantId }: DomainManagementProps) => {
                       <p className="text-sm text-muted-foreground">
                         Status: {domain.status}
                       </p>
+                      {domainConfigs[domain.domain] && (
+                        <div className="mt-2 text-sm">
+                          <p className="font-medium">Configuration:</p>
+                          <pre className="mt-1 p-2 bg-muted rounded-md overflow-x-auto">
+                            {JSON.stringify(domainConfigs[domain.domain], null, 2)}
+                          </pre>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleGetConfig(domain.domain)}
+                        disabled={isLoadingConfig[domain.domain]}
+                      >
+                        <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingConfig[domain.domain] ? 'animate-spin' : ''}`} />
+                        {isLoadingConfig[domain.domain] ? 'Loading...' : 'Get Config'}
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"

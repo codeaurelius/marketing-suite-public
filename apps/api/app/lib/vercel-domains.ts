@@ -81,6 +81,14 @@ export class VercelDomainService {
       );
 
       if (!response.ok) {
+        // console log the response error
+        const errorData = await response.json();
+        console.error('Vercel API Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData,
+        });
+
         throw new Error('Failed to get domain configuration');
       }
 
