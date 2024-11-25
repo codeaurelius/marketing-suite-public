@@ -33,9 +33,10 @@ import {
 import { Input } from '@repo/design-system/components/ui/input';
 import { Label } from '@repo/design-system/components/ui/label';
 import { useToast } from '@repo/design-system/components/ui/use-toast';
+import { env } from '@repo/env';
 import { useMutation, useQuery } from 'convex/react';
 import { Globe, PlusIcon, RefreshCw, TrashIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 // Define regex pattern at the top level for better performance
 const DOMAIN_REGEX =
@@ -59,62 +60,155 @@ const EmptyState = () => (
   </div>
 );
 
-export function DomainManagement({ tenantId }: DomainManagementProps) {
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [newDomain, setNewDomain] = useState('');
-  const [domainError, setDomainError] = useState<string | null>(null);
+export const DomainManagement = ({ tenantId }: DomainManagementProps) => {
   const { toast } = useToast();
-
+  const [newDomain, setNewDomain] = useState('');
+  const [isAddingDomain, setIsAddingDomain] = useState(false);
+  const [isVerifyingDomain, setIsVerifyingDomain] = useState(false);
+  const [domainConfigs, setDomainConfigs] = useState<Record<string, any>>({});
   const domains = useQuery(api.domains.list, { tenantId });
-  const createDomain = useMutation(api.domains.create);
+  const addDomain = useMutation(api.domains.create);
   const verifyDomain = useMutation(api.domains.verifyDomain);
-  const deleteDomain = useMutation(api.domains.remove);
+  const removeDomain = useMutation(api.domains.remove);
+
+  // Fetch domain configurations when domains list changes
+  useEffect(() => {
+    const fetchDomainConfigs = async () => {
+      if (!domains) return;
+
+      const configs: Record<string, any> = {};
+      for (const domain of domains) {
+        try {
+          const response = await fetch(
+            `${env.NEXT_PUBLIC_API_URL}/domains/${domain.domain}`
+          );
+          if (response.ok) {
+            configs[domain.domain] = await response.json();
+          }
+        } catch (error) {
+          console.error(`Error fetching config for ${domain.domain}:`, error);
+        }
+      }
+      setDomainConfigs(configs);
+    };
+
+    fetchDomainConfigs();
+  }, [domains]);
 
   const handleAddDomain = async () => {
     if (!isValidDomain(newDomain)) {
-      setDomainError('Please enter a valid domain (e.g., example.com)');
+      toast({
+        title: 'Invalid domain',
+        description: 'Please enter a valid domain name',
+        variant: 'destructive',
+      });
       return;
     }
 
+    setIsAddingDomain(true);
     try {
-      await createDomain({
-        domain: newDomain,
-        tenantId,
+      // First add to our database
+      const domainId = await addDomain({ domain: newDomain, tenantId });
+
+      // Then add to Vercel
+      const response = await fetch(`${env.NEXT_PUBLIC_API_URL}/domains`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ domain: newDomain }),
       });
-      setIsAddDialogOpen(false);
-      setNewDomain('');
+
+      if (!response.ok) {
+        throw new Error('Failed to add domain to Vercel');
+      }
+
+      const vercelDomain = await response.json();
       toast({
-        title: 'Success',
-        description: 'Domain added successfully',
+        title: 'Domain added',
+        description:
+          'Please configure your DNS settings according to the instructions below',
       });
+
+      setNewDomain('');
     } catch (error) {
-      // biome-ignore lint/suspicious/noConsole: <explanation>
-      console.error('Failed to add domain:', error);
-      const errorMessage =
-        error instanceof Error ? error.message : 'Failed to add domain';
       toast({
         title: 'Error',
-        description: errorMessage,
+        description: 'Failed to add domain. Please try again.',
         variant: 'destructive',
       });
+    } finally {
+      setIsAddingDomain(false);
     }
   };
 
-  const handleVerifyDomain = async (domainId: Id<'domains'>) => {
+  const handleVerifyDomain = async (
+    domainId: Id<'domains'>,
+    domain: string
+  ) => {
+    setIsVerifyingDomain(true);
+    console.log('Verifying domain:', domain);
     try {
-      await verifyDomain({ domainId });
-      toast({
-        title: 'Success',
-        description: 'Domain verification started',
-      });
+      const response = await fetch(
+        `${env.NEXT_PUBLIC_API_URL}/domains/${domain}/verify`,
+        {
+          method: 'POST',
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to verify domain');
+      }
+
+      const vercelDomain = await response.json();
+      if (vercelDomain.verified) {
+        await verifyDomain({ domainId });
+        toast({
+          title: 'Domain verified',
+          description: 'Your domain is now ready to use',
+        });
+      } else {
+        toast({
+          title: 'Verification failed',
+          description: 'Please check your DNS settings and try again',
+          variant: 'destructive',
+        });
+      }
     } catch (error) {
-      // biome-ignore lint/suspicious/noConsole: <explanation>
-      console.error('Failed to verify domain:', error);
-      const errorMessage =
-        error instanceof Error ? error.message : 'Failed to verify domain';
       toast({
         title: 'Error',
-        description: errorMessage,
+        description: 'Failed to verify domain. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsVerifyingDomain(false);
+    }
+  };
+
+  const handleRemoveDomain = async (
+    domainId: Id<'domains'>,
+    domain: string
+  ) => {
+    try {
+      await removeDomain({ domainId });
+
+      const response = await fetch(
+        `${env.NEXT_PUBLIC_API_URL}/domains/${domain}`,
+        {
+          method: 'DELETE',
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to remove domain from Vercel');
+      }
+
+      toast({
+        title: 'Domain removed',
+        description: 'Domain has been successfully removed',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to remove domain. Please try again.',
         variant: 'destructive',
       });
     }
@@ -134,7 +228,7 @@ export function DomainManagement({ tenantId }: DomainManagementProps) {
       <CardContent>
         <div className="space-y-4">
           <div className="flex justify-end">
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <Dialog open={isAddingDomain} onOpenChange={setIsAddingDomain}>
               <DialogTrigger asChild>
                 <Button>
                   <PlusIcon className="mr-2 h-4 w-4" />
@@ -157,25 +251,17 @@ export function DomainManagement({ tenantId }: DomainManagementProps) {
                       value={newDomain}
                       onChange={(e) => {
                         setNewDomain(e.target.value);
-                        setDomainError(null);
                       }}
-                      className={domainError ? 'border-destructive' : ''}
-                      aria-invalid={!!domainError}
-                      aria-errormessage={
-                        domainError ? 'domain-error' : undefined
-                      }
+                      className=""
+                      aria-invalid={false}
+                      aria-errormessage={undefined}
                     />
-                    {domainError && (
-                      <p id="domain-error" className="text-sm text-destructive">
-                        {domainError}
-                      </p>
-                    )}
                   </div>
                 </div>
                 <DialogFooter>
                   <Button
                     onClick={handleAddDomain}
-                    disabled={!newDomain || !!domainError}
+                    disabled={!newDomain}
                     type="submit"
                   >
                     Add Domain
@@ -192,72 +278,77 @@ export function DomainManagement({ tenantId }: DomainManagementProps) {
               domains?.map((domain) => (
                 <div
                   key={domain._id}
-                  className="flex items-center justify-between rounded-lg border p-4"
+                  className="flex flex-col rounded-lg border p-4 space-y-2"
                 >
-                  <div>
-                    <p className="font-medium">{domain.domain}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Status: {domain.status}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleVerifyDomain(domain._id)}
-                      disabled={domain.status === 'verified'}
-                    >
-                      <RefreshCw className="mr-2 h-4 w-4" />
-                      Verify
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="destructive" size="sm">
-                          <TrashIcon className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Domain</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to delete this domain? This
-                            action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={async () => {
-                              try {
-                                await deleteDomain({ domainId: domain._id });
-                                toast({
-                                  title: 'Success',
-                                  description: 'Domain deleted successfully',
-                                });
-                              } catch (error) {
-                                // biome-ignore lint/suspicious/noConsole: <explanation>
-                                console.error(
-                                  'Failed to delete domain:',
-                                  error
-                                );
-                                const errorMessage =
-                                  error instanceof Error
-                                    ? error.message
-                                    : 'Failed to delete domain';
-                                toast({
-                                  title: 'Error',
-                                  description: errorMessage,
-                                  variant: 'destructive',
-                                });
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">{domain.domain}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Status: {domain.status}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          handleVerifyDomain(domain._id, domain.domain)
+                        }
+                        disabled={domain.status === 'verified'}
+                      >
+                        <RefreshCw className="mr-2 h-4 w-4" />
+                        Verify
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="destructive" size="sm">
+                            <TrashIcon className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Domain</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete this domain? This
+                              action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() =>
+                                handleRemoveDomain(domain._id, domain.domain)
                               }
-                            }}
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </div>
+                  {domainConfigs[domain.domain] && (
+                    <div className="mt-2 text-sm space-y-1 border-t pt-2">
+                      <p>
+                        <span className="font-medium">
+                          Verification Status:
+                        </span>{' '}
+                        {domainConfigs[domain.domain].verified
+                          ? 'Verified'
+                          : 'Not Verified'}
+                      </p>
+                      {domainConfigs[domain.domain].verification?.map(
+                        (v: any, i: number) => (
+                          <div key={i} className="pl-4 text-muted-foreground">
+                            <p>Type: {v.type}</p>
+                            <p className="font-mono text-xs break-all">
+                              Value: {v.value}
+                            </p>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  )}
                 </div>
               ))
             )}
@@ -266,4 +357,4 @@ export function DomainManagement({ tenantId }: DomainManagementProps) {
       </CardContent>
     </Card>
   );
-}
+};
