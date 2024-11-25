@@ -80,7 +80,13 @@ export const DomainManagement = ({ tenantId }: DomainManagementProps) => {
       for (const domain of domains) {
         try {
           const response = await fetch(
-            `${env.NEXT_PUBLIC_API_URL}/domains/${domain.domain}`
+            `${env.NEXT_PUBLIC_API_URL}/domains/${domain.domain}`,
+            {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }
           );
           if (response.ok) {
             configs[domain.domain] = await response.json();
@@ -151,6 +157,9 @@ export const DomainManagement = ({ tenantId }: DomainManagementProps) => {
         `${env.NEXT_PUBLIC_API_URL}/domains/${domain}/verify`,
         {
           method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
         }
       );
 
@@ -194,6 +203,9 @@ export const DomainManagement = ({ tenantId }: DomainManagementProps) => {
         `${env.NEXT_PUBLIC_API_URL}/domains/${domain}`,
         {
           method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
         }
       );
 
