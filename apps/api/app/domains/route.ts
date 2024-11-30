@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { vercelDomainService } from '../lib/vercel-domains';
+// TODO: delete this line
 
 export async function POST(request: NextRequest) {
   try {
