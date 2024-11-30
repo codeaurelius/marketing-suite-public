@@ -218,3 +218,16 @@ export const remove = mutation({
     await ctx.db.delete(args.domainId);
   },
 });
+
+// getByDomain
+export const getByDomain = query({
+  args: {
+    domain: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query('domains')
+      .withIndex('by_domain', (q) => q.eq('domain', args.domain))
+      .first();
+  },
+});

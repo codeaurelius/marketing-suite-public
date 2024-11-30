@@ -20,15 +20,18 @@ export function middleware(request: NextRequest) {
 
   // Add CORS headers to the response
   response.headers.set('Access-Control-Allow-Origin', env.NEXT_PUBLIC_APP_URL);
-  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  response.headers.set(
+    'Access-Control-Allow-Methods',
+    'GET, POST, PUT, DELETE, OPTIONS'
+  );
+  response.headers.set(
+    'Access-Control-Allow-Headers',
+    'Content-Type, Authorization'
+  );
 
   return response;
 }
 
 export const config = {
-  matcher: [
-    '/domains/:path*',
-    '/domains',
-  ],
+  matcher: ['/domains/:path*', '/domains'],
 };

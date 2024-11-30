@@ -25,10 +25,18 @@ export class VercelDomainService {
     'Content-Type': 'application/json',
   };
 
+  private isWebDomain(domain: string): boolean {
+    return domain === env.NEXT_PUBLIC_WEB_URL.replace(/^https?:\/\//, '');
+  }
+
   async addDomain(domain: string): Promise<VercelDomainResponse> {
+    if (this.isWebDomain(domain)) {
+      throw new Error('Cannot add web URL domain');
+    }
+
     try {
       const response = await fetch(
-        `${env.VERCEL_API_URL}/v9/projects/${env.VERCEL_PROJECT_ID}/domains`,
+        `${env.VERCEL_API_URL}/v9/projects/${env.VERCEL_PROJECT_ID}/domains?teamId=${env.VERCEL_TEAM_ID}`,
         {
           method: 'POST',
           headers: this.headers,
@@ -51,7 +59,7 @@ export class VercelDomainService {
   async verifyDomain(domain: string): Promise<VercelDomainResponse> {
     try {
       const response = await fetch(
-        `${env.VERCEL_API_URL}/v9/projects/${env.VERCEL_PROJECT_ID}/domains/${domain}/verify`,
+        `${env.VERCEL_API_URL}/v9/projects/${env.VERCEL_PROJECT_ID}/domains/${domain}/verify?teamId=${env.VERCEL_TEAM_ID}`,
         {
           method: 'POST',
           headers: this.headers,
@@ -70,29 +78,55 @@ export class VercelDomainService {
     }
   }
 
-  async getDomainConfiguration(domain: string): Promise<VercelDomainResponse> {
+  async getDomainConfiguration(domain: string): Promise<any> {
     try {
-      const response = await fetch(
-        `${env.VERCEL_API_URL}/v9/projects/${env.VERCEL_PROJECT_ID}/domains/${domain}`,
-        {
-          method: 'GET',
-          headers: this.headers,
-        }
-      );
+      const [configResponse, domainResponse] = await Promise.all([
+        fetch(
+          `${env.VERCEL_API_URL}/v6/domains/${domain}/config?teamId=${env.VERCEL_TEAM_ID}`,
+          {
+            method: 'GET',
+            headers: this.headers,
+          }
+        ),
+        fetch(
+          `${env.VERCEL_API_URL}/v9/projects/${env.VERCEL_PROJECT_ID}/domains/${domain}?teamId=${env.VERCEL_TEAM_ID}`,
+          {
+            method: 'GET',
+            headers: this.headers,
+          }
+        ),
+      ]);
 
-      if (!response.ok) {
-        // console log the response error
-        const errorData = await response.json();
-        console.error('Vercel API Error:', {
-          status: response.status,
-          statusText: response.statusText,
-          error: errorData,
-        });
-
+      if (!configResponse.ok || !domainResponse.ok) {
         throw new Error('Failed to get domain configuration');
       }
 
-      return response.json();
+      const configJson = await configResponse.json();
+      const domainJson = await domainResponse.json();
+      if (domainResponse.status !== 200) {
+        return domainJson;
+      }
+
+      // TODO: check if verified. if not, do verification
+      // biome-ignore lint/suspicious/noEvolvingTypes: <explanation>
+      let verificationResponse = null;
+      if (!domainJson.verified) {
+        verificationResponse = await this.verifyDomain(domain);
+      }
+
+      if (verificationResponse?.verified) {
+        return {
+          configured: !configJson.misconfigured,
+          ...verificationResponse,
+        };
+      }
+
+      return {
+        configured: !configJson.misconfigured,
+        ...(verificationResponse ? { verificationResponse } : {}),
+        ...configJson,
+        ...domainJson,
+      };
     } catch (error) {
       // biome-ignore lint/suspicious/noConsole: <explanation>
       console.error('Error getting domain configuration:', error);
@@ -101,6 +135,10 @@ export class VercelDomainService {
   }
 
   async removeDomain(domain: string): Promise<void> {
+    if (this.isWebDomain(domain)) {
+      throw new Error('Cannot remove web URL domain');
+    }
+
     try {
       const response = await fetch(
         `${env.VERCEL_API_URL}/v9/projects/${env.VERCEL_PROJECT_ID}/domains/${domain}`,

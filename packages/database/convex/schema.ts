@@ -51,7 +51,7 @@ export default defineSchema(
       verificationToken: v.string(),
       createdAt: v.number(),
       updatedAt: v.number(),
-    }),
+    }).index('by_domain', ['domain']),
     // New table for mapping domains to landing pages
     landingPageDomains: defineTable({
       domainId: v.id('domains'),
