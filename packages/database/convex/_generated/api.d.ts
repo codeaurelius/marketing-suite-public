@@ -14,7 +14,6 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as domains from "../domains.js";
-import type * as init from "../init.js";
 import type * as landingPages from "../landingPages.js";
 import type * as migrations from "../migrations.js";
 import type * as tenants from "../tenants.js";
@@ -30,7 +29,6 @@ import type * as users from "../users.js";
  */
 declare const fullApi: ApiFromModules<{
   domains: typeof domains;
-  init: typeof init;
   landingPages: typeof landingPages;
   migrations: typeof migrations;
   tenants: typeof tenants;
