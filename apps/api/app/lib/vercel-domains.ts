@@ -1,22 +1,9 @@
 import { env } from '@repo/env';
-
-export interface VercelDomainResponse {
-  name: string;
-  apexName: string;
-  projectId: string;
-  redirect?: string | null;
-  redirectStatusCode?: number | null;
-  gitBranch?: string | null;
-  updatedAt?: number;
-  createdAt?: number;
-  verified: boolean;
-  verification?: {
-    type: string;
-    domain: string;
-    value: string;
-    reason: string;
-  }[];
-}
+import type {
+  VercelDomainConfig,
+  VercelDomainInfo,
+  VercelDomainResponse,
+} from './types';
 
 export class VercelDomainService {
   private readonly headers = {
@@ -56,7 +43,7 @@ export class VercelDomainService {
     }
   }
 
-  async verifyDomain(domain: string): Promise<VercelDomainResponse> {
+  async verifyDomain(domain: string): Promise<VercelDomainInfo> {
     try {
       const response = await fetch(
         `${env.VERCEL_API_URL}/v9/projects/${env.VERCEL_PROJECT_ID}/domains/${domain}/verify?teamId=${env.VERCEL_TEAM_ID}`,
@@ -70,7 +57,8 @@ export class VercelDomainService {
         throw new Error('Failed to verify domain');
       }
 
-      return response.json();
+      const verificationResponse: VercelDomainInfo = await response.json();
+      return verificationResponse;
     } catch (error) {
       // biome-ignore lint/suspicious/noConsole: <explanation>
       console.error('Error verifying domain:', error);
@@ -78,7 +66,7 @@ export class VercelDomainService {
     }
   }
 
-  async getDomainConfiguration(domain: string): Promise<any> {
+  async getDomainConfiguration(domain: string): Promise<VercelDomainResponse> {
     try {
       const [configResponse, domainResponse] = await Promise.all([
         fetch(
@@ -101,31 +89,32 @@ export class VercelDomainService {
         throw new Error('Failed to get domain configuration');
       }
 
-      const configJson = await configResponse.json();
-      const domainJson = await domainResponse.json();
-      if (domainResponse.status !== 200) {
-        return domainJson;
-      }
+      const [config, info]: [VercelDomainConfig, VercelDomainInfo] =
+        await Promise.all([configResponse.json(), domainResponse.json()]);
 
-      // TODO: check if verified. if not, do verification
-      // biome-ignore lint/suspicious/noEvolvingTypes: <explanation>
-      let verificationResponse = null;
-      if (!domainJson.verified) {
+      /**
+       * If domain is not verified, we try to verify now
+       */
+      let verificationResponse: VercelDomainInfo | null = null;
+      if (!info.verified) {
         verificationResponse = await this.verifyDomain(domain);
       }
 
       if (verificationResponse?.verified) {
+        /**
+         * Domain was just verified
+         */
         return {
-          configured: !configJson.misconfigured,
-          ...verificationResponse,
+          configured: !config.misconfigured,
+          config,
+          info: verificationResponse,
         };
       }
 
       return {
-        configured: !configJson.misconfigured,
-        ...(verificationResponse ? { verificationResponse } : {}),
-        ...configJson,
-        ...domainJson,
+        configured: !config.misconfigured,
+        config,
+        info,
       };
     } catch (error) {
       // biome-ignore lint/suspicious/noConsole: <explanation>

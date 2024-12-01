@@ -1,26 +1,36 @@
+import type {
+  DomainVerificationChallenge,
+  VercelDomainResponse,
+} from '@repo/api';
 import ConfiguredSectionPlaceholder from './configured-section-placeholder';
 
-function getVerificationError(verificationResponse: any) {
+function getVerificationError(verification?: DomainVerificationChallenge[]) {
   try {
-    const error = verificationResponse.error;
-    if (error.code === 'missing_txt_record') {
+    if (!verification || verification.length === 0) {
       return null;
     }
-    return error.message;
+    const error = verification[0];
+    if (error.reason === 'missing_txt_record') {
+      return null;
+    }
+    return error.reason;
   } catch {
     return null;
   }
 }
 
-const ConfiguredSection = (domainConfig: any) => {
-  const { config } = domainConfig;
+interface ConfiguredSectionProps {
+  domainInfo: VercelDomainResponse | null;
+}
 
-  if (!config) {
+const ConfiguredSection = ({ domainInfo }: ConfiguredSectionProps) => {
+  if (!domainInfo) {
     return <ConfiguredSectionPlaceholder />;
   }
+  const { info, config, configured } = domainInfo;
 
-  if (!config?.verified) {
-    const txtVerification = config.verification.find((x) => x?.type === 'TXT');
+  if (!info.verified) {
+    const txtVerification = info.verification?.find((x) => x?.type === 'TXT');
     return (
       <>
         <div className="flex items-center space-x-3 my-3 px-2 sm:px-10">
@@ -53,33 +63,39 @@ const ConfiguredSection = (domainConfig: any) => {
           </div>
           <div className="my-3 text-left">
             <p className="my-5 text-sm">
-              Please set the following TXT record on {config.apexName} to prove
-              ownership of {config.name}:
+              Please set the following TXT record on {info.apexName} to prove
+              ownership of {info.name}:
             </p>
             <div className="flex justify-start items-start space-x-10 bg-gray-50 p-2 rounded-md">
               <div>
                 <p className="text-sm font-bold">Type</p>
-                <p className="text-sm font-mono mt-2">{txtVerification.type}</p>
+                <p className="text-sm font-mono mt-2">
+                  {txtVerification?.type}
+                </p>
               </div>
               <div>
                 <p className="text-sm font-bold">Name</p>
                 <p className="text-sm font-mono mt-2">
-                  {txtVerification.domain.slice(
+                  {txtVerification?.domain.slice(
                     0,
-                    txtVerification.domain.length - config.apexName.length - 1
+                    txtVerification?.domain.length -
+                      (info.apexName?.length || 0) -
+                      1
                   )}
                 </p>
               </div>
               <div>
                 <p className="text-sm font-bold">Value</p>
                 <p className="text-sm font-mono mt-2">
-                  <span className="text-ellipsis">{txtVerification.value}</span>
+                  <span className="text-ellipsis">
+                    {txtVerification?.value}
+                  </span>
                 </p>
               </div>
             </div>
-            {getVerificationError(config.verificationResponse) && (
+            {getVerificationError(info.verification) && (
               <p className="my-5 text-sm text-red-700">
-                {getVerificationError(config.verificationResponse)}
+                {getVerificationError(info.verification)}
               </p>
             )}
           </div>
@@ -105,9 +121,9 @@ const ConfiguredSection = (domainConfig: any) => {
             cx="12"
             cy="12"
             r="10"
-            fill={config?.configured ? '#1976d2' : '#d32f2f'}
+            fill={configured ? '#1976d2' : '#d32f2f'}
           />
-          {config?.configured ? (
+          {configured ? (
             <>
               <path
                 d="M8 11.8571L10.5 14.3572L15.8572 9"
@@ -124,16 +140,14 @@ const ConfiguredSection = (domainConfig: any) => {
         </svg>
         <p
           className={`${
-            config?.configured
-              ? 'text-black font-normal'
-              : 'text-red-700 font-medium'
+            configured ? 'text-black font-normal' : 'text-red-700 font-medium'
           } text-sm`}
         >
-          {config?.configured ? 'Valid' : 'Invalid'} Configuration
+          {configured ? 'Valid' : 'Invalid'} Configuration
         </p>
       </div>
 
-      {!config?.configured && (
+      {!configured && (
         <>
           <div className="w-full border-t border-gray-100 mt-5 mb-8" />
 

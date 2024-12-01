@@ -1,5 +1,6 @@
 'use client';
 
+import type { VercelDomainResponse } from '@repo/api';
 import type { Id } from '@repo/database/convex/_generated/dataModel';
 import {
   AlertDialog,
@@ -30,7 +31,7 @@ export interface DomainCardProps {
 
 export const DomainCard = ({ domain, onRemove }: DomainCardProps) => {
   const { toast } = useToast();
-  const [config, setConfig] = useState<any>(null);
+  const [config, setConfig] = useState<VercelDomainResponse | null>(null);
   const [isLoadingConfig, setIsLoadingConfig] = useState(false);
 
   const fetchConfig = useCallback(async () => {
@@ -147,7 +148,7 @@ export const DomainCard = ({ domain, onRemove }: DomainCardProps) => {
         </div>
       </div>
 
-      <ConfiguredSection config={config} />
+      <ConfiguredSection domainInfo={config} />
     </div>
   );
 };
