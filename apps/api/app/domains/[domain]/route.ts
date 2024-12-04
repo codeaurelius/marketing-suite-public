@@ -1,7 +1,7 @@
+import type { VercelDomainResponse } from '@/lib/types';
+import { vercelDomainService } from '@/lib/vercel-domains';
 import { env } from '@repo/env';
 import { type NextRequest, NextResponse } from 'next/server';
-import { vercelDomainService } from '../../lib/vercel-domains';
-import type { VercelDomainResponse } from '../../lib/vercel-domains';
 
 export type ResponseData = VercelDomainResponse | { error: string };
 

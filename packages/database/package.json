@@ -7,7 +7,7 @@
     "dev": "convex dev --tail-logs",
     "setup": "convex dev --once && convex env set VALIDATE_ENV=true",
     "build": "[ \"$VERCEL_ENV\" = \"preview\" ] && echo \"Skipping convex deploy in preview environment\" || pnpm run deploy",
-    "deploy": "./reset-tables.sh && convex deploy --yes --tail-logs",
+    "deploy": "./reset-tables.sh && convex deploy --yes",
     "import-sample": "convex import --table tasks sampleData.jsonl",
     "reset-tables": "./reset-tables.sh"
   },

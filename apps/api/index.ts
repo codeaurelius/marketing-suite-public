@@ -4,4 +4,4 @@ export type {
   VercelDomainInfo,
   VercelDomainResponse,
   VercelVerificationResponse,
-} from '@/lib/types';
+} from './lib/types';
