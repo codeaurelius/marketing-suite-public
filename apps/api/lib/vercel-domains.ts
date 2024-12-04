@@ -6,6 +6,9 @@ import type {
 } from './types';
 
 export class VercelDomainService {
+  // Add this as a static readonly property
+  private static readonly PROTOCOL_REGEX = /^https?:\/\//;
+
   private readonly headers = {
     // biome-ignore lint/style/useNamingConvention: <explanation>
     Authorization: `Bearer ${env.VERCEL_API_TOKEN}`,
@@ -13,7 +16,10 @@ export class VercelDomainService {
   };
 
   private isWebDomain(domain: string): boolean {
-    return domain === env.NEXT_PUBLIC_WEB_URL.replace(/^https?:\/\//, '');
+    return (
+      domain ===
+      env.NEXT_PUBLIC_WEB_URL.replace(VercelDomainService.PROTOCOL_REGEX, '')
+    );
   }
 
   async addDomain(domain: string): Promise<VercelDomainResponse> {

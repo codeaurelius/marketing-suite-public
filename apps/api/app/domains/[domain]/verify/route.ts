@@ -1,8 +1,11 @@
+import type { VercelDomainInfo, VercelDomainResponse } from '@/lib/types';
+import { vercelDomainService } from '@/lib/vercel-domains';
 import { type NextRequest, NextResponse } from 'next/server';
-import { vercelDomainService } from '../../../lib/vercel-domains';
-import type { VercelDomainResponse } from '../../../lib/vercel-domains';
 
-export type ResponseData = VercelDomainResponse | { error: string };
+export type ResponseData =
+  | VercelDomainResponse
+  | VercelDomainInfo
+  | { error: string };
 
 export async function POST(
   _request: NextRequest,
