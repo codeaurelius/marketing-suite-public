@@ -30,6 +30,10 @@ const server: Parameters<typeof createEnv>[0]['server'] = {
 
   // Convex Configuration
   CONVEX_DEPLOY_KEY: z.string().min(1),
+  VERCEL_PROJECT_ID: z.string().min(1).startsWith('prj_'),
+  VERCEL_TEAM_ID: z.string().min(1).startsWith('team_'),
+  VERCEL_API_TOKEN: z.string().min(1),
+  VERCEL_API_URL: z.string().min(1).url(),
 };
 
 const client: Parameters<typeof createEnv>[0]['client'] = {
@@ -39,8 +43,10 @@ const client: Parameters<typeof createEnv>[0]['client'] = {
   NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL: z.string().min(1).startsWith('/'),
   NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: z.string().min(1).startsWith('/'),
   NEXT_PUBLIC_APP_URL: z.string().min(1).url(),
+  NEXT_PUBLIC_API_URL: z.string().min(1).url(),
   NEXT_PUBLIC_WEB_URL: z.string().min(1).url(),
   NEXT_PUBLIC_DOCS_URL: z.string().min(1).url(),
+  NEXT_PUBLIC_SITES_URL: z.string().min(1).url(),
   NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().min(1).startsWith('G-'),
   NEXT_PUBLIC_POSTHOG_KEY: z.string().min(1).startsWith('phc_'),
   NEXT_PUBLIC_POSTHOG_HOST: z.string().min(1).url(),
@@ -72,6 +78,10 @@ export const env = createEnv({
     FLAGS_SECRET: process.env.FLAGS_SECRET,
     SVIX_TOKEN: process.env.SVIX_TOKEN,
     CONVEX_DEPLOY_KEY: process.env.CONVEX_DEPLOY_KEY,
+    VERCEL_PROJECT_ID: process.env.VERCEL_PROJECT_ID,
+    VERCEL_TEAM_ID: process.env.VERCEL_TEAM_ID,
+    VERCEL_API_TOKEN: process.env.VERCEL_API_TOKEN,
+    VERCEL_API_URL: process.env.VERCEL_API_URL,
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
       process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
     NEXT_PUBLIC_CLERK_SIGN_IN_URL: process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL,
@@ -81,8 +91,10 @@ export const env = createEnv({
     NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL:
       process.env.NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
     NEXT_PUBLIC_WEB_URL: process.env.NEXT_PUBLIC_WEB_URL,
     NEXT_PUBLIC_DOCS_URL: process.env.NEXT_PUBLIC_DOCS_URL,
+    NEXT_PUBLIC_SITES_URL: process.env.NEXT_PUBLIC_SITES_URL,
     NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,

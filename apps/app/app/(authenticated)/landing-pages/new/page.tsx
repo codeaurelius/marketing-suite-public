@@ -4,17 +4,14 @@ import { api } from '@repo/database';
 import { useToast } from '@repo/design-system/components/ui/use-toast';
 import { useMutation } from 'convex/react';
 import { useRouter } from 'next/navigation';
-import {
-  LandingPageBuilder,
-  type LandingPageContent,
-} from '../components/landing-page-builder';
+import type { LandingPageContent } from '../components/landing-page-builder';
 
 export default function NewLandingPage() {
   const router = useRouter();
   const { toast } = useToast();
   const createLandingPageMutation = useMutation(api.landingPages.create);
 
-  const handleSubmit = async (
+  const handleSubmit = (
     content: LandingPageContent,
     template: 'modern' | 'classic'
   ) => {
@@ -30,12 +27,13 @@ export default function NewLandingPage() {
       const htmlContent = iframeDoc.documentElement.outerHTML;
 
       // Save to database
-      await createLandingPageMutation({
-        ...content,
-        template,
-        html: htmlContent,
-        userId: 'user123', // TODO: Replace with actual user ID from auth
-      });
+      // await createLandingPageMutation({
+      //   ...content,
+      //   template,
+      //   html: htmlContent,
+      //   userId: 'user123', // TODO: Replace with actual user ID from auth
+      //   tenantId: 'tenant123',
+      // });
 
       toast({
         title: 'Success',
@@ -52,11 +50,12 @@ export default function NewLandingPage() {
     }
   };
 
-  return (
-    <LandingPageBuilder
-      onBack={() => router.push('/landing-pages')}
-      onSubmit={handleSubmit}
-      submitLabel="Create Landing Page"
-    />
-  );
+  // return (
+  //   <LandingPageBuilder
+  //     onBack={() => router.push('/landing-pages')}
+  //     onSubmit={handleSubmit}
+  //     submitLabel="Create Landing Page"
+  //   />
+  // );
+  return <>Landing Page Builder placeholder</>;
 }

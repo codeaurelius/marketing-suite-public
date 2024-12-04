@@ -7,13 +7,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@repo/design-system/components/ui/collapsible';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@repo/design-system/components/ui/dropdown-menu';
+import {} from '@repo/design-system/components/ui/dropdown-menu';
 import {
   Sidebar,
   SidebarContent,
@@ -35,21 +29,14 @@ import {
 import { cn } from '@repo/design-system/lib/utils';
 import {
   AnchorIcon,
-  BookOpenIcon,
-  BotIcon,
+  BuildingIcon,
   ChevronRightIcon,
-  FolderIcon,
-  FrameIcon,
   LifeBuoyIcon,
-  MapIcon,
-  MoreHorizontalIcon,
   PieChartIcon,
   SendIcon,
-  Settings2Icon,
-  ShareIcon,
   SquareTerminalIcon,
-  Trash2Icon,
 } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 type GlobalSidebarProperties = {
@@ -60,7 +47,8 @@ const data = {
   user: {
     name: 'shadcn',
     email: 'm@example.com',
-    avatar: '/avatars/shadcn.jpg',
+    image:
+      'https://pbs.twimg.com/profile_images/1574758464620605440/OB8Q4RqE_400x400.jpg',
   },
   navMain: [
     {
@@ -70,85 +58,24 @@ const data = {
       isActive: true,
       items: [
         {
-          title: 'History',
-          url: '#',
+          title: 'Dashboard',
+          icon: PieChartIcon,
+          url: '/',
         },
         {
-          title: 'Starred',
-          url: '#',
+          title: 'Tenants',
+          icon: BuildingIcon,
+          url: '/tenants',
         },
         {
-          title: 'Settings',
+          title: 'Domains',
+          icon: AnchorIcon,
           url: '#',
         },
         {
           title: 'Landing Pages',
-          url: 'landing-pages',
-        },
-      ],
-    },
-    {
-      title: 'Models',
-      url: '#',
-      icon: BotIcon,
-      items: [
-        {
-          title: 'Genesis',
-          url: '#',
-        },
-        {
-          title: 'Explorer',
-          url: '#',
-        },
-        {
-          title: 'Quantum',
-          url: '#',
-        },
-      ],
-    },
-    {
-      title: 'Documentation',
-      url: '#',
-      icon: BookOpenIcon,
-      items: [
-        {
-          title: 'Introduction',
-          url: '#',
-        },
-        {
-          title: 'Get Started',
-          url: '#',
-        },
-        {
-          title: 'Tutorials',
-          url: '#',
-        },
-        {
-          title: 'Changelog',
-          url: '#',
-        },
-      ],
-    },
-    {
-      title: 'Settings',
-      url: '#',
-      icon: Settings2Icon,
-      items: [
-        {
-          title: 'General',
-          url: '#',
-        },
-        {
-          title: 'Team',
-          url: '#',
-        },
-        {
-          title: 'Billing',
-          url: '#',
-        },
-        {
-          title: 'Limits',
-          url: '#',
+          icon: AnchorIcon,
+          url: '/landing-pages',
         },
       ],
     },
@@ -170,27 +97,18 @@ const data = {
       icon: SendIcon,
     },
   ],
-  projects: [
-    {
-      name: 'Design Engineering',
-      url: '#',
-      icon: FrameIcon,
-    },
-    {
-      name: 'Sales & Marketing',
-      url: '#',
-      icon: PieChartIcon,
-    },
-    {
-      name: 'Travel',
-      url: '#',
-      icon: MapIcon,
-    },
-  ],
 };
 
 export const GlobalSidebar = ({ children }: GlobalSidebarProperties) => {
   const sidebar = useSidebar();
+  const pathname = usePathname();
+
+  const isActive = (url: string) => {
+    if (url === '/') {
+      return pathname === url;
+    }
+    return pathname.startsWith(url);
+  };
 
   return (
     <>
@@ -223,7 +141,14 @@ export const GlobalSidebar = ({ children }: GlobalSidebarProperties) => {
                   defaultOpen={item.isActive}
                 >
                   <SidebarMenuItem>
-                    <SidebarMenuButton asChild tooltip={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      tooltip={item.title}
+                      className={cn(
+                        isActive(item.url) &&
+                          'bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground'
+                      )}
+                    >
                       <CollapsibleTrigger asChild>
                         <a href={item.url}>
                           <item.icon />
@@ -259,54 +184,7 @@ export const GlobalSidebar = ({ children }: GlobalSidebarProperties) => {
               ))}
             </SidebarMenu>
           </SidebarGroup>
-          <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-            <SidebarGroupLabel>Projects</SidebarGroupLabel>
-            <SidebarMenu>
-              {data.projects.map((item) => (
-                <SidebarMenuItem key={item.name}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.name}</span>
-                    </a>
-                  </SidebarMenuButton>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <SidebarMenuAction showOnHover>
-                        <MoreHorizontalIcon />
-                        <span className="sr-only">More</span>
-                      </SidebarMenuAction>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      className="w-48"
-                      side="bottom"
-                      align="end"
-                    >
-                      <DropdownMenuItem>
-                        <FolderIcon className="text-muted-foreground" />
-                        <span>View Project</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <ShareIcon className="text-muted-foreground" />
-                        <span>Share Project</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem>
-                        <Trash2Icon className="text-muted-foreground" />
-                        <span>Delete Project</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </SidebarMenuItem>
-              ))}
-              <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <MoreHorizontalIcon />
-                  <span>More</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroup>
+
           <SidebarGroup className="mt-auto">
             <SidebarGroupContent>
               <SidebarMenu>

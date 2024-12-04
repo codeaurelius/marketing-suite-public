@@ -51,6 +51,7 @@ export default function EditLandingPage({ params }: EditLandingPageProps) {
       });
       router.push('/landing-pages');
     } catch (error) {
+      // biome-ignore lint/suspicious/noConsole: <explanation>
       console.error('Failed to update landing page:', error);
       toast({
         title: 'Error',

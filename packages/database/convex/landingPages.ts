@@ -12,13 +12,20 @@ export const create = mutation({
     template: v.union(v.literal('modern'), v.literal('classic')),
     html: v.string(),
     userId: v.string(),
+    tenantId: v.id('tenants'),
   },
   handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error('Not authenticated');
+    }
+
     const now = Date.now();
     return await ctx.db.insert('landingPages', {
       ...args,
       createdAt: now,
       updatedAt: now,
+      published: false, // Default to unpublished
     });
   },
 });
