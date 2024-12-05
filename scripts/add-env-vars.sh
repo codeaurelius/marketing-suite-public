@@ -1,38 +1,71 @@
 #!/bin/bash
 
-# Check if Vercel CLI is installed
-if ! command -v vercel &> /dev/null; then
-    echo "Error: Vercel CLI is not installed. Install it using 'npm install -g vercel'."
-    exit 1
-fi
-
 # Usage function
 usage() {
-    echo "Usage: $0 -f <input-file> -e <vercel-environment>"
+    echo "Usage: $0 --app [app|api|web] -f <input-file> -e <vercel-environment>"
+    echo "  --app <app>             The app directory (app, api, web) under /apps"
     echo "  -f <input-file>         Path to the .env file containing environment variables"
     echo "  -e <vercel-environment> Target Vercel environment (preview, production, or development)"
     exit 1
 }
 
 # Parse flags
-while getopts "f:e:" opt; do
-    case $opt in
-        f) INPUT_FILE="$OPTARG" ;;
-        e) ENVIRONMENT="$OPTARG" ;;
-        *) usage ;;
+APP=""
+INPUT_FILE=""
+ENVIRONMENT=""
+
+while [[ "$#" -gt 0 ]]; do
+    case "$1" in
+        --app)
+            APP="$2"
+            shift 2
+            ;;
+        -f)
+            INPUT_FILE="$2"
+            shift 2
+            ;;
+        -e)
+            ENVIRONMENT="$2"
+            shift 2
+            ;;
+        *)
+            echo "Unknown option: $1"
+            usage
+            ;;
     esac
 done
 
+# Validate app directory
+if [[ -z "$APP" ]]; then
+    echo "Error: Missing --app argument."
+    usage
+fi
+
+APP_DIR="./apps/$APP"
+if [[ ! -d "$APP_DIR" ]]; then
+    echo "Error: App directory '$APP_DIR' does not exist."
+    exit 1
+fi
+
 # Validate input file
-if [ -z "$INPUT_FILE" ] || [ ! -f "$INPUT_FILE" ]; then
+if [[ -z "$INPUT_FILE" || ! -f "$INPUT_FILE" ]]; then
     echo "Error: Input file not specified or does not exist."
     usage
 fi
 
 # Validate environment
-if [ -z "$ENVIRONMENT" ] || [[ ! "$ENVIRONMENT" =~ ^(preview|production|development)$ ]]; then
+if [[ -z "$ENVIRONMENT" || ! "$ENVIRONMENT" =~ ^(preview|production|development)$ ]]; then
     echo "Error: Invalid or missing Vercel environment. Must be 'preview', 'production', or 'development'."
     usage
+fi
+
+# Navigate to the app directory
+cd "$APP_DIR" || { echo "Error: Failed to navigate to $APP_DIR"; exit 1; }
+
+# Check if Vercel CLI is installed
+if ! command -v vercel &> /dev/null; then
+    echo "Error: Vercel CLI is not installed. Install it using 'npm install -g vercel'."
+    exit 1
 fi
 
 # Process the input file and add variables to the specified Vercel environment
