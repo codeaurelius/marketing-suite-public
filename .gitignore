@@ -39,3 +39,7 @@ yarn-error.log*
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+# Vercel env files
+.env.preview
+.env.production

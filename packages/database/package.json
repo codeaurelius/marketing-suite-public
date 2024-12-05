@@ -6,18 +6,20 @@
   "scripts": {
     "dev": "convex dev --tail-logs",
     "setup": "convex dev --once && convex env set VALIDATE_ENV=true",
-    "build": "[ \"$VERCEL_ENV\" = \"preview\" ] && echo \"Skipping convex deploy in preview environment\" || convex deploy",
-    "import-sample": "convex import --table tasks sampleData.jsonl"
+    "build": "[ \"$VERCEL_ENV\" = \"preview\" ] && echo \"Skipping convex deploy in preview environment\" || pnpm run deploy",
+    "deploy": "./reset-tables.sh && convex deploy --yes",
+    "import-sample": "convex import --table tasks sampleData.jsonl",
+    "reset-tables": "./reset-tables.sh"
   },
   "dependencies": {
     "@repo/env": "workspace:*",
-    "convex": "^1.17.0",
+    "convex": "^1.17.2",
     "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
-    "@types/node": "22.9.0",
+    "@types/node": "22.9.3",
     "bufferutil": "^4.0.8",
-    "typescript": "^5.6.3"
+    "typescript": "^5.7.2"
   }
 }

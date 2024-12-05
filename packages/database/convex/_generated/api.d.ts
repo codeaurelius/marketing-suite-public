@@ -13,8 +13,10 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as domains from "../domains.js";
 import type * as landingPages from "../landingPages.js";
-import type * as tasks from "../tasks.js";
+import type * as migrations from "../migrations.js";
+import type * as tenants from "../tenants.js";
 import type * as users from "../users.js";
 
 /**
@@ -26,8 +28,10 @@ import type * as users from "../users.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  domains: typeof domains;
   landingPages: typeof landingPages;
-  tasks: typeof tasks;
+  migrations: typeof migrations;
+  tenants: typeof tenants;
   users: typeof users;
 }>;
 export declare const api: FilterApi<
