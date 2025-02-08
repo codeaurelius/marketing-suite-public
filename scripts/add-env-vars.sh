@@ -2,26 +2,20 @@
 
 # Usage function
 usage() {
-    echo "Usage: $0 --app [app|api|web] -f <input-file> -e <vercel-environment>"
+    echo "Usage: $0 --app [app|api|web] -e <vercel-environment>"
     echo "  --app <app>             The app directory (app, api, web) under /apps"
-    echo "  -f <input-file>         Path to the .env file containing environment variables"
     echo "  -e <vercel-environment> Target Vercel environment (preview, production, or development)"
     exit 1
 }
 
 # Parse flags
 APP=""
-INPUT_FILE=""
 ENVIRONMENT=""
 
 while [[ "$#" -gt 0 ]]; do
     case "$1" in
         --app)
             APP="$2"
-            shift 2
-            ;;
-        -f)
-            INPUT_FILE="$2"
             shift 2
             ;;
         -e)
@@ -47,20 +41,30 @@ if [[ ! -d "$APP_DIR" ]]; then
     exit 1
 fi
 
-# Validate input file
-if [[ -z "$INPUT_FILE" || ! -f "$INPUT_FILE" ]]; then
-    echo "Error: Input file not specified or does not exist."
-    usage
-fi
-
 # Validate environment
 if [[ -z "$ENVIRONMENT" || ! "$ENVIRONMENT" =~ ^(preview|production|development)$ ]]; then
     echo "Error: Invalid or missing Vercel environment. Must be 'preview', 'production', or 'development'."
     usage
 fi
 
-# Navigate to the app directory
+# Navigate to the app directory first
 cd "$APP_DIR" || { echo "Error: Failed to navigate to $APP_DIR"; exit 1; }
+
+# Determine input file based on environment (now relative to app directory)
+if [[ "$ENVIRONMENT" == "production" ]]; then
+    INPUT_FILE=".env.production"
+elif [[ "$ENVIRONMENT" == "preview" ]]; then
+    INPUT_FILE=".env.preview"
+else
+    echo "Error: Development environment is not supported for automatic env file selection."
+    exit 1
+fi
+
+# Validate input file exists
+if [[ ! -f "$INPUT_FILE" ]]; then
+    echo "Error: Environment file '$INPUT_FILE' does not exist in $APP_DIR"
+    exit 1
+fi
 
 # Check if Vercel CLI is installed
 if ! command -v vercel &> /dev/null; then
